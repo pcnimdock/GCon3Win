@@ -25,9 +25,9 @@ GunCon 3 is a light gun originally designed for PlayStation 3. This project enab
 
 Right-clicking the tray icon displays the following options:
 
-- **Calibration**  
-- **Enable Mouse**  
-- **Exit**
+- **Calibration**  (Calibración)
+- **Enable Mouse**  (Habilitar Mouse)
+- **Exit** (Salir)
 
 > ⚠️ **Note:** For now, when selecting **Calibration** and completing the process, the application will **automatically close**. This is a temporary behavior.
 
