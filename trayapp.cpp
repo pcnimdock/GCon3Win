@@ -33,6 +33,10 @@ TrayApp::TrayApp(QObject *parent) : QObject(parent)
             mouse->clicIzquierdo();
             }
         }
+         // Si se pulsa el B1, hacer clic derecho
+        if (buttons & 0x00000400){
+            mouse->clicDerecho();
+        }
 
     });
 
