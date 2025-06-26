@@ -28,6 +28,7 @@ Right-clicking the tray icon displays the following options:
 - **Calibration**  (Calibración)
 - **Enable Mouse**  (Habilitar Mouse)
 - **Exit** (Salir)
+- On mouse mode. Trigger is left click and B1 right click
 
 > ⚠️ **Note:** For now, when selecting **Calibration** and completing the process, the application will **automatically close**. This is a temporary behavior.
 
