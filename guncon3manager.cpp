@@ -1,4 +1,5 @@
 #include "guncon3manager.h"
+#include "driverinstaller.h"
 #include <QDebug>
 #include <QTimer>
 #include <QSettings>
@@ -295,8 +296,15 @@ void GunCon3Manager::addGun(const QString &devicePath, const QString &portPath)
     });
 
     if (!gun->open()) {
-        qWarning() << "[Manager] No se pudo abrir:" << devicePath;
+        // open() falla si la pistola no tiene WinUSB asignado.
+        // Instalar el driver y relanzar un scan tras 2 s.
         delete gun;
+        qDebug() << "[Manager] open() fallo, intentando instalar WinUSB...";
+        QString err;
+        if (!installWinUsbDriver(err))
+            qWarning() << "[Manager] No se pudo instalar WinUSB:" << err;
+        else
+            QTimer::singleShot(2000, this, &GunCon3Manager::scan);
         return;
     }
 

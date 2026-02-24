@@ -1,5 +1,4 @@
 #include "trayapp.h"
-#include "driverinstaller.h"
 #include <QApplication>
 #include <QMessageBox>
 #include <QDebug>
@@ -25,13 +24,6 @@ static QString settingsKey(const QString &path)
 // ─────────────────────────────────────────────────────────────────────────────
 TrayApp::TrayApp(QObject *parent) : QObject(parent)
 {
-    {
-        QString err;
-        if (!installWinUsbDriver(err))
-            QMessageBox::warning(nullptr, "Driver WinUSB",
-                "No se pudo instalar el driver WinUSB.\n\n" + err);
-    }
-
     m_tray = new QSystemTrayIcon(QIcon(":/icono.ico"), this);
     m_tray->setToolTip("GunCon3Win");
     buildTrayMenu();
