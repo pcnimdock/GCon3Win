@@ -5,25 +5,32 @@ CONFIG -= console
 
 SOURCES += \
     main.cpp \
-    mouseemulator.cpp \
-    trayapp.cpp \
-    calibrador.cpp \
     guncon3.cpp \
-    guncon3vjoybridge.cpp
+    guncon3manager.cpp \
+    virtualmouse.cpp \
+    calibrador.cpp \
+    trayapp.cpp \
+    driverinstaller.cpp
 
 HEADERS += \
-    mouseemulator.h \
-    trayapp.h \
-    calibrador.h \
     guncon3.h \
-    guncon3vjoybridge.h
+    guncon3manager.h \
+    virtualmouse.h \
+    calibrador.h \
+    trayapp.h \
+    driverinstaller.h
 
 win32 {
-    INCLUDEPATH += $$PWD/external/vJoySDK/SDK/inc
-    LIBS += -L$$PWD/external/vJoySDK/SDK/lib/x64 -lvjoyinterface
-    LIBS += -lwinusb
-    LIBS += -lsetupapi
-    LIBS += -luser32
+    LIBS += -lwinusb       # Comunicacion USB con la GunCon3
+    LIBS += -lsetupapi     # Enumeracion de dispositivos (SetupDiGetClassDevs...)
+    LIBS += -lcfgmgr32     # Arbol PnP (CM_Locate_DevNode, CM_Get_Parent, CM_Get_Device_ID)
+    LIBS += -lnewdev       # UpdateDriverForPlugAndPlayDevices (instalacion WinUSB)
+    LIBS += -lhid          # HID subsystem headers
+    LIBS += -luser32       # Mensajes Win32 (SetWindowLongPtr...)
+    LIBS += -lshell32      # ShellExecuteEx (UAC)
+    LIBS += -ladvapi32     # OpenProcessToken, GetTokenInformation (detección admin)
+
+    RC_ICONS = icono.ico
 }
 
 RESOURCES += \

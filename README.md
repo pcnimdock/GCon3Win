@@ -1,86 +1,103 @@
-# 🎮 GunCon 3 to vJoy Bridge for Windows
+# 🎮 GunCon3Win — Sin drivers de terceros
 
-This project allows you to use a **GunCon 3 light gun** on **Windows 10/11**, mapping its input through **vJoy** as a virtual joystick.  
-It uses **WinUSB** to communicate with the GunCon 3 and sends the interpreted data to **vJoy**.
-
----
-
-## 📷 About
-
-GunCon 3 is a light gun originally designed for PlayStation 3. This project enables its use on modern Windows systems for emulators or light gun-compatible games.
+Controlador para la **GunCon 3** (pistola de luz de PS3) en Windows 10/11.  
+**No requiere vJoy, ViGEm ni ningún instalador externo.**  
+Todos los drivers utilizados vienen incluidos en el propio Windows.
 
 ---
 
-## 🧩 Features
+## ✅ Características
 
-- 🎯 GunCon 3 input reading via WinUSB  
-- 🕹️ Sends data to vJoy as a virtual joystick  
-- ✅ Compatible with Windows 10 and 11  
-- 🛠️ Lightweight and minimal setup  
-- 🖥️ System tray icon with context menu
-
----
-
-## 🖱️ Tray Icon Menu
-
-Right-clicking the tray icon displays the following options:
-
-- **Calibration**  (Calibración)
-- **Enable Mouse**  (Habilitar Mouse)
-- **Exit** (Salir)
-
-> ⚠️ **Note:** For now, when selecting **Calibration** and completing the process, the application will **automatically close**. This is a temporary behavior.
+- 🎯 Lectura de la GunCon3 via **WinUSB** (incluido en Windows)
+- 🕹️ **Joystick virtual HID** nativo (Virtual HID Framework, Windows 10 1709+)
+- 🖱️ Emulación de **ratón** opcional (aim → cursor, trigger → clic)
+- 🔧 **Instalación automática del driver WinUSB** la primera vez (solicita UAC una sola vez)
+- 📐 Sistema de calibración integrado
+- 🗂️ Icono en la bandeja del sistema
 
 ---
 
-## 🛠 Requirements
+## 🗺️ Arquitectura
 
-Before running this software, install the following components:
+```
+GunCon3 (USB)
+    │
+    ├── WinUSB (driver de Windows) ← se instala automáticamente
+    │
+    └── GunCon3Win.exe
+            ├── guncon3.cpp       — Lee los datos crudos vía WinUSB
+            ├── driverinstaller.cpp — Instala WinUSB si hace falta (UAC)
+            ├── virtualjoystick.cpp — Joystick HID via Virtual HID Framework
+            ├── mouseemulator.cpp  — Ratón via SendInput
+            └── trayapp.cpp        — UI bandeja sistema + calibración
+```
 
-### 🔌 1. GunCon 3 WinUSB Driver
+### Componentes de Windows usados (todos incluidos en el SO)
 
-Download and install the WinUSB driver for GunCon 3 from the sonik-br GunconUSB project:
-
-[Guncon3_winusb_driver_installer.7z](https://github.com/sonik-br/GunconUSB/blob/main/drivers/Guncon3_winusb_driver_installer.7z)
-
-> Unzip the archive and run the installer.
-
-### 🕹️ 2. vJoy Signed Driver (Windows 10/11)
-
-Download the signed vJoy driver from Brunner Innovation:
-
-[vJoySetup_v2.2.2.0_Win10_Win11.exe](https://github.com/BrunnerInnovation/vJoy/releases/download/v2.2.2.0/vJoySetup_v2.2.2.0_Win10_Win11.exe)
-
-> This version is required for proper driver signing on modern systems.
-
----
-
-## 🚀 Getting Started
-
-1. Install the GunCon 3 WinUSB driver.  
-2. Install the vJoy driver.  
-3. Run the application while the GunCon 3 is connected via USB.
+| Componente | Para qué |
+|---|---|
+| `WinUSB.sys` | Comunicación USB con la GunCon3 |
+| `vhf.sys` / `VirtualHidDevice` | Crear el joystick virtual HID |
+| `setupapi.dll` + `newdev.dll` | Instalar WinUSB la primera vez |
+| `user32.dll` (SendInput) | Emulación de ratón |
 
 ---
 
-## 🔧 Build Instructions
+## 🚀 Uso
 
-This project is written in C++ and uses Qt for the UI.
+1. Conecta la GunCon3 por USB.
+2. Ejecuta `GunCon3Win.exe`.
+3. La primera vez pedirá permiso de administrador (UAC) para instalar el driver WinUSB.  
+   Las siguientes veces no lo pedirá.
+4. Aparece el icono en la bandeja del sistema.
 
-- Run `setup_vjoy.bat` to download the vJoy SDK  
-- Open the project with Qt Creator  
-- Select MSVC2022 64-bit kit and build
+### Menú de la bandeja
 
-### Build Requirements
-
-- Qt 6.9.0 MSVC2022 64-bit  
-- Qt Creator
+| Opción | Descripción |
+|---|---|
+| **Calibrar GunCon3** | Calibración de 5 puntos |
+| **Habilitar/Deshabilitar ratón** | Activa el modo cursor |
+| **Joystick virtual activo/no disponible** | Estado informativo |
+| **Salir** | Cierra la aplicación |
 
 ---
 
-## 📌 Notes
+## 🔧 Compilación
 
-- GunCon 3 must be connected via USB and properly detected by the driver.  
-- vJoy must have a virtual joystick configured (use vJoyConfig after installation).  
-- Only tested with one GunCon 3 so far.
+### Requisitos
 
+- Qt 6.x con MSVC 2022 64-bit
+- Windows SDK 10.0.19041 o superior (incluye las cabeceras de VHF)
+
+### Pasos
+
+```bash
+# En Qt Creator: seleccionar kit MSVC2022 x64 y compilar
+# O desde línea de comandos (Developer Command Prompt):
+qmake Gcon3Win.pro
+nmake
+```
+
+> **Nota:** No se necesita descargar ningún SDK adicional. El Windows SDK incluido
+> con Visual Studio tiene todos los headers necesarios (`winusb.h`, `hidsdi.h`,
+> `newdev.h`, `cfgmgr32.h`).
+
+---
+
+## ⚙️ Compatibilidad del joystick virtual
+
+El **Virtual HID Framework (VHF)** está disponible desde **Windows 10 versión 1709**
+(Fall Creators Update, octubre 2017). Si estás en una versión anterior, el joystick
+virtual no funcionará, pero el modo ratón sí.
+
+El joystick virtual aparece en el sistema como un gamepad HID genérico con:
+- 6 ejes: X/Y (apuntado), Z/Rz (Stick A), Rx/Ry (Stick B)
+- 16 botones
+
+---
+
+## 📝 Notas
+
+- Solo probado con una GunCon3.
+- El proceso elevado (UAC) para instalar el driver es temporal: solo se ejecuta
+  cuando el dispositivo no tiene WinUSB asignado.
